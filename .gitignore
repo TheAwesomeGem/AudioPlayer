@@ -1,0 +1,13 @@
+**/.idea/*
+**/build/*
+.idea
+build
+.idea/
+build/
+/.idea
+/build
+/build/
+/.idea/
+Song1.mp3
+Song2.mp3
+Song3.mp3
