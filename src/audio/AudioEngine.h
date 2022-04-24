@@ -29,7 +29,7 @@ public:
     {
         float length = 0.0F;
 
-        ma_sound_get_length_in_seconds(const_cast<ma_sound*>(audios.at(id)), &length);
+        ma_sound_get_length_in_seconds(const_cast<ma_sound*>(audios.at(id).get()), &length);
 
         return length;
     }
@@ -38,14 +38,14 @@ public:
     {
         float position = 0.0F;
 
-        ma_sound_get_cursor_in_seconds(const_cast<ma_sound*>(audios.at(id)), &position);
+        ma_sound_get_cursor_in_seconds(const_cast<ma_sound*>(audios.at(id).get()), &position);
 
         return position;
     }
 
     [[nodiscard]] bool IsPlaying(xg::Guid id) const
     {
-        return ma_sound_is_playing(audios.at(id));
+        return ma_sound_is_playing(audios.at(id).get());
     }
 
     [[nodiscard]] size_t Count() const
@@ -60,6 +60,6 @@ public:
 
 private:
     std::unique_ptr<ma_engine> engine;
-    std::unordered_map<xg::Guid, ma_sound*> audios;
+    std::unordered_map<xg::Guid, std::unique_ptr<ma_sound>> audios;
     SoundFinishCallback soundFinishCallback;
 };
