@@ -1,5 +1,6 @@
 // Copyright (c) Topaz Centuallas 2022.
 
+#include <thread>
 #include "AudioEngine.h"
 
 
@@ -39,6 +40,15 @@ bool AudioEngine::Init()
     return true;
 }
 
+static void UpdateSound(SoundFinishCallback finishCallback, xg::Guid id, ma_sound* sound)
+{
+    while (!ma_sound_at_end(sound))
+    {
+    }
+
+    finishCallback(id);
+}
+
 size_t AudioEngine::Add(xg::Guid id, const char* fileName)
 {
     ma_sound* sound = new ma_sound;
@@ -51,6 +61,9 @@ size_t AudioEngine::Add(xg::Guid id, const char* fileName)
     }
 
     audios[id] = sound;
+
+    std::thread backgroundThread{UpdateSound, soundFinishCallback, id, sound};
+    backgroundThread.detach();
 
     return 0;
 }

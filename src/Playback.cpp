@@ -4,9 +4,15 @@
 #include "Playback.h"
 
 
+// TODO: Use thread queues instead of callback for player events.
+static void OnMediaFinish(MediaId mediaId)
+{
+    printf("Finished playing media: %s\n", mediaId.str().c_str());
+}
+
 bool Playback::Init()
 {
-    if (!player.Init())
+    if (!player.Init(OnMediaFinish))
     {
         return false;
     }

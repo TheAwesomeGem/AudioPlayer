@@ -23,7 +23,7 @@ public:
         std::string name;
     };
 
-    bool Init();
+    bool Init(SoundFinishCallback soundFinishCallback);
 
     bool Load(const char* fileName);
 

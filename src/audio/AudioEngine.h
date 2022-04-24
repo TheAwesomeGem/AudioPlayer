@@ -8,6 +8,8 @@
 #include "../thirdparty/miniaudio.h"
 
 
+using SoundFinishCallback = void (*)(xg::Guid);
+
 class AudioEngine
 {
 public:
@@ -51,7 +53,13 @@ public:
         return audios.size();
     }
 
+    void SetSoundFinishCallback(SoundFinishCallback finishCallback)
+    {
+        soundFinishCallback = finishCallback;
+    }
+
 private:
     std::unique_ptr<ma_engine> engine;
     std::unordered_map<xg::Guid, ma_sound*> audios;
+    SoundFinishCallback soundFinishCallback;
 };

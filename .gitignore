@@ -8,6 +8,9 @@ build/
 /build
 /build/
 /.idea/
+/bk/
 Song1.mp3
 Song2.mp3
 Song3.mp3
+/asset/Test1.wav
+/asset/Test2.wav
