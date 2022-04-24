@@ -62,7 +62,7 @@ size_t AudioEngine::Add(xg::Guid id, const char* fileName)
 
     audios[id] = std::move(sound);
 
-    std::thread backgroundThread{UpdateSound, soundFinishCallback, id, sound.get()}; // TODO: Ensure that the sound doesn't get destroyed and then used on the background
+    std::thread backgroundThread{UpdateSound, soundFinishCallback, id, audios[id].get()}; // TODO: Ensure that the sound doesn't get destroyed and then used on the background
     backgroundThread.detach();
 
     return 0;
