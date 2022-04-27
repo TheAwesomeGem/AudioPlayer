@@ -17,6 +17,8 @@ public:
         size_t currentIndex;
     };
 
+    ~Playback();
+
     bool Init();
 
     void AddAll(); // TODO: Debug method to add all medias to the playlist
@@ -27,7 +29,10 @@ public:
 
     void Skip();
 
+    void ConsumeAudioEvents(UnbufferedChannel<AudioEvent>& eventChannel);
+
 private:
     Player player;
     Playlist playlist; // TODO: We want many playlists using PlaylistId
+    std::thread backgroundThread;
 };

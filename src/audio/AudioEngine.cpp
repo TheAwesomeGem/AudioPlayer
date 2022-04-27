@@ -16,6 +16,13 @@ AudioEngine::~AudioEngine()
         ma_sound_uninit(sound.get());
         sound.reset(nullptr);
     }
+
+    isDestroyed.store(true);
+
+    if (backgroundThread.joinable())
+    {
+        backgroundThread.join();
+    }
 }
 
 bool AudioEngine::Init()
@@ -37,16 +44,11 @@ bool AudioEngine::Init()
         return false;
     }
 
+    std::thread thread{&AudioEngine::UpdateSounds, this };
+
+    backgroundThread = std::move(thread);
+
     return true;
-}
-
-static void UpdateSound(SoundFinishCallback finishCallback, xg::Guid id, ma_sound* sound)
-{
-    while (!ma_sound_at_end(sound))
-    {
-    }
-
-    finishCallback(id);
 }
 
 size_t AudioEngine::Add(xg::Guid id, const char* fileName)
@@ -61,9 +63,6 @@ size_t AudioEngine::Add(xg::Guid id, const char* fileName)
     }
 
     audios[id] = std::move(sound);
-
-    std::thread backgroundThread{UpdateSound, soundFinishCallback, id, audios[id].get()}; // TODO: Ensure that the sound doesn't get destroyed and then used on the background
-    backgroundThread.detach();
 
     return 0;
 }
@@ -83,4 +82,19 @@ void AudioEngine::Start(xg::Guid id)
 void AudioEngine::Stop(xg::Guid id)
 {
     ma_sound_stop(audios[id].get());
+}
+
+void AudioEngine::UpdateSounds()
+{
+    while(!isDestroyed)
+    {
+        // TODO: Fix data races by creating a thread safe unordered_map.
+        for(auto& [key, value] : audios)
+        {
+            if(ma_sound_at_end(value.get()))
+            {
+                eventChannel.send(AudioEvent{key, AudioEventType::Finish});
+            }
+        }
+    }
 }

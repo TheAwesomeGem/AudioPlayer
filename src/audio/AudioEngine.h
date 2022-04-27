@@ -6,9 +6,19 @@
 #include <unordered_map>
 #include <crossguid/guid.hpp>
 #include "../thirdparty/miniaudio.h"
+#include "../Channel.h"
 
 
-using SoundFinishCallback = void (*)(xg::Guid);
+enum class AudioEventType
+{
+    Finish
+};
+
+struct AudioEvent
+{
+    xg::Guid id;
+    AudioEventType type;
+};
 
 class AudioEngine
 {
@@ -24,6 +34,8 @@ public:
     void Start(xg::Guid id);
 
     void Stop(xg::Guid id);
+
+    void UpdateSounds();
 
     [[nodiscard]] float GetAudioLength(xg::Guid id) const
     {
@@ -53,13 +65,15 @@ public:
         return audios.size();
     }
 
-    void SetSoundFinishCallback(SoundFinishCallback finishCallback)
+    [[nodiscard]] UnbufferedChannel<AudioEvent>& GetEventChannel()
     {
-        soundFinishCallback = finishCallback;
+        return eventChannel;
     }
 
 private:
     std::unique_ptr<ma_engine> engine;
     std::unordered_map<xg::Guid, std::unique_ptr<ma_sound>> audios;
-    SoundFinishCallback soundFinishCallback;
+    UnbufferedChannel<AudioEvent> eventChannel;
+    std::thread backgroundThread;
+    std::atomic_bool isDestroyed = false;
 };

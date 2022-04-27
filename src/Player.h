@@ -23,7 +23,7 @@ public:
         std::string name;
     };
 
-    bool Init(SoundFinishCallback soundFinishCallback);
+    bool Init();
 
     bool Load(const char* fileName);
 
@@ -58,6 +58,11 @@ public:
     [[nodiscard]] size_t MediaCount() const
     {
         return mediaInfos.size();
+    }
+
+    [[nodiscard]] UnbufferedChannel<AudioEvent>& GetEventChannel()
+    {
+        return audioEngine.GetEventChannel();
     }
 
 private:

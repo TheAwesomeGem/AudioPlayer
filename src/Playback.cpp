@@ -4,18 +4,23 @@
 #include "Playback.h"
 
 
-// TODO: Use thread queues instead of callback for player events.
-static void OnMediaFinish(MediaId mediaId)
+Playback::~Playback()
 {
-    printf("Finished playing media: %s\n", mediaId.str().c_str());
+    if (backgroundThread.joinable())
+    {
+        backgroundThread.join();
+    }
 }
 
 bool Playback::Init()
 {
-    if (!player.Init(OnMediaFinish))
+    if (!player.Init())
     {
         return false;
     }
+
+    std::thread thread{&Playback::ConsumeAudioEvents, this, std::ref(player.GetEventChannel())};
+    backgroundThread = std::move(thread);
 
     // TODO: Move filesystem out of this. Bad practice!
     for (const auto& entry: std::filesystem::directory_iterator(std::filesystem::current_path()))
@@ -59,4 +64,19 @@ void Playback::Skip()
     // TODO: Should Playlist just be data?
 
     player.Play(playlist.medias[playlist.currentIndex]);
+}
+
+void Playback::ConsumeAudioEvents(UnbufferedChannel<AudioEvent>& eventChannel)
+{
+    while (!eventChannel.isClosed())
+    {
+        std::optional<AudioEvent> audioEvent = eventChannel.receive();
+
+        if (audioEvent.has_value())
+        {
+            // TODO: Figure out how to send this information back to main thread in a unblocking callback fashion.
+
+            std::cout << "Consumer received event " << (int) audioEvent->type << " from " << audioEvent->id.str() << '\n';
+        }
+    }
 }

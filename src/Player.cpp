@@ -3,16 +3,9 @@
 #include "Player.h"
 
 
-bool Player::Init(SoundFinishCallback finishCallback)
+bool Player::Init()
 {
-    if(!audioEngine.Init())
-    {
-        return false;
-    }
-
-    audioEngine.SetSoundFinishCallback(finishCallback);
-
-    return true;
+    return audioEngine.Init();
 }
 
 bool Player::Load(const char* fileName)
