@@ -20,7 +20,7 @@ public:
 
     void send(T data_) // BLOCKING CALL TODO: Should this be Universal Reference T&&. Then non-trivial data types won't work.
     {
-        std::unique_lock<std::mutex> dataGuard{dataMutex};
+        std::lock_guard dataGuard{dataMutex};
         data = std::forward<T>(data_);
         isDataSent = true;
         dataCondition.notify_all(); // Notify all the threads that are waiting on this condition. Aka all the receivers.
@@ -28,7 +28,7 @@ public:
 
     std::optional<T> receive() // BLOCKING CALL
     {
-        std::unique_lock<std::mutex> dataGuard{dataMutex};
+        std::unique_lock dataGuard{dataMutex};
         dataCondition.wait(dataGuard, [this]()
         {
             return isDataSent || shouldClose;
@@ -53,7 +53,7 @@ public:
 
         shouldClose = true;
 
-        std::unique_lock<std::mutex> dataGuard{dataMutex};
+        std::lock_guard dataGuard{dataMutex};
         isDataSent = true;
         dataCondition.notify_all(); // Notify all the threads that are waiting on this condition. Aka all the receivers.
     }
