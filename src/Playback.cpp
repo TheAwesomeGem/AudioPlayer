@@ -74,9 +74,10 @@ void Playback::ConsumeAudioEvents(UnbufferedChannel<AudioEvent>& eventChannel)
 
         if (audioEvent.has_value())
         {
-            // TODO: Figure out how to send this information back to main thread in a unblocking callback fashion.
-
-            std::cout << "Consumer received event " << (int) audioEvent->type << " from " << audioEvent->id.str() << '\n';
+            if (audioEvent->type == AudioEventType::Finish)
+            {
+                Skip(); // TODO: This could cause data race.
+            }
         }
     }
 }
